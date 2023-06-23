@@ -1,0 +1,25 @@
+{
+  "name": "projeto-labook-backend-",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsc && node ./build/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BrunaSpaniol/projeto-labook-backend-.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BrunaSpaniol/projeto-labook-backend-/issues"
+  },
+  "homepage": "https://github.com/BrunaSpaniol/projeto-labook-backend-#readme",
+  "devDependencies": {
+    "@types/node": "^20.3.1",
+    "typescript": "^5.1.3"
+  }
+}

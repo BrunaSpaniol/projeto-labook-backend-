@@ -1,0 +1,6 @@
+GET http://localhost:3003/users
+
+###
+
+POST http://localhost:3003/users
+

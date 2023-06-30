@@ -14,6 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
+const User_1 = require("./models/User");
+const knex_1 = require("./database/knex");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
@@ -23,6 +25,36 @@ app.listen(3003, () => {
 app.get("/ping", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         res.status(200).send({ message: "Pong!" });
+    }
+    catch (error) {
+        console.log(error);
+        if (req.statusCode === 200) {
+            res.status(500);
+        }
+        if (error instanceof Error) {
+            res.send(error.message);
+        }
+        else {
+            res.send("Erro inesperado");
+        }
+    }
+}));
+app.get("/users", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const q = req.query.q;
+        let usersDB;
+        if (q) {
+            const result = yield (0, knex_1.db)("users").where("name", "LIKE", `%${q}%`);
+            usersDB = result;
+        }
+        else {
+            const result = yield (0, knex_1.db)("users");
+            usersDB = result;
+        }
+        const result = usersDB.map((user) => {
+            return new User_1.User(user.id, user.name, user.email, user.password, user.created_at);
+        });
+        res.status(200).send(result);
     }
     catch (error) {
         console.log(error);

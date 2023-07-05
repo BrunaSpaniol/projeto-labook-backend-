@@ -1,9 +1,12 @@
+import { USER_ROLES } from "./types";
+
 export class User {
   constructor(
     private id: string,
     private name: string,
     private email: string,
     private password: string,
+    private role: keyof typeof USER_ROLES,
     private created_at: string
   ) {}
 
@@ -23,6 +26,10 @@ export class User {
     return this.password;
   };
 
+  public getRole = (): keyof typeof USER_ROLES => {
+    return this.role;
+  };
+
   public getCreatedAt = (): string => {
     return this.created_at;
   };
@@ -39,14 +46,11 @@ export class User {
     this.password = input;
   };
 
+  public setRole = (input: keyof typeof USER_ROLES): void => {
+    this.role = input;
+  };
+
   public setCreatedAt = (input: string): void => {
     this.created_at = input;
   };
 }
-
-const user = new User("1", "bruna", "email@email.com", "jhdjhsdjhsd", "agora");
-
-user.getName
-user.setName("Raoni");
-
-console.log(user);

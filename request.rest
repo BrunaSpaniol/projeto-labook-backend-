@@ -2,5 +2,65 @@ GET http://localhost:3003/users
 
 ###
 
-POST http://localhost:3003/users
+POST http://localhost:3003/users/signup HTTP/1.1
+content-type: application/json
 
+{
+    "name": "Rabeta",
+    "email": "rabeta@email.com",
+    "password": "fulano123"
+}
+
+###
+
+GET http://localhost:3003/users/login HTTP/1.1
+content-type: application/json
+
+{
+    "email": "rabeta@email.com",
+    "password": "fulano123"
+}
+
+###
+
+GET http://localhost:3003/posts
+
+###
+POST http://localhost:3003/posts HTTP/1.1
+content-type: application/json
+
+{
+    "creator_id": "u002",
+    "content": "Rabeta é uma cachorrinha muito linda e adora dormir no sofá"
+}
+
+###
+
+PUT http://localhost:3003/posts/post_0.8316615776161198 HTTP/1.1
+content-type: application/json
+
+{
+    "creator_id": "u002",
+    "content": "Rabeta é uma cachorrinha safada"
+}
+
+###
+
+DELETE  http://localhost:3003/posts/post_0.6535501821486265 HTTP/1.1
+content-type: application/json
+
+{
+    "creator_id": "u002"
+}
+
+###
+
+POST "http://localhost:3003/likes/post_0.8316615776161198" HTTP/1.1
+content-type: application/json
+
+{
+    "like": "false",
+    "userId": "u002"
+}
+
+###

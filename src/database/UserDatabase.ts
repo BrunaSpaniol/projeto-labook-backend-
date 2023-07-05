@@ -1,4 +1,5 @@
-import { TUserDB, TUserDBPost } from "../models/types";
+import { TUserDB } from "../models/types";
+
 import { BaseDatabase } from "./BaseDatabase";
 
 export class UserDatabase extends BaseDatabase {
@@ -22,6 +23,22 @@ export class UserDatabase extends BaseDatabase {
     return usersDB;
   }
 
+  public async findUsersByParams<T>(params: string, value: T): Promise<TUserDB | undefined> {
+    const [userDb]: TUserDB[] = await BaseDatabase.connection(
+      UserDatabase.TABLE_NAME
+    ).where({ [params]: value });
+
+    return userDb;
+  }
+
+  public async findUserLogin(email:string, password:string): Promise<TUserDB | undefined> {
+    const [userDb]: TUserDB[] = await BaseDatabase.connection(
+      UserDatabase.TABLE_NAME
+    ).where({ email, password })
+
+    return userDb
+  }
+
   public async findUserById(id: string): Promise<TUserDB | undefined> {
     const [userDb]: TUserDB[] = await BaseDatabase.connection(
       UserDatabase.TABLE_NAME
@@ -30,7 +47,9 @@ export class UserDatabase extends BaseDatabase {
     return userDb;
   }
 
-  public async insertUser(newUserdb: TUserDBPost): Promise<void> {
+  public async insertUser(
+    newUserdb: Pick<TUserDB, "name" | "email" | "password">
+  ): Promise<void> {
     await BaseDatabase.connection(UserDatabase.TABLE_NAME).insert(newUserdb);
   }
 }

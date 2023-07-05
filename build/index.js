@@ -1,72 +1,28 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
-const User_1 = require("./models/User");
-const knex_1 = require("./database/knex");
+const UserControler_1 = require("./controller/UserControler");
+const PostControler_1 = require("./controller/PostControler");
+const LikesControler_1 = require("./controller/LikesControler");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
 app.listen(3003, () => {
     console.log("Servidor rodando na porta 3003");
 });
-app.get("/ping", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        res.status(200).send({ message: "Pong!" });
-    }
-    catch (error) {
-        console.log(error);
-        if (req.statusCode === 200) {
-            res.status(500);
-        }
-        if (error instanceof Error) {
-            res.send(error.message);
-        }
-        else {
-            res.send("Erro inesperado");
-        }
-    }
-}));
-app.get("/users", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const q = req.query.q;
-        let usersDB;
-        if (q) {
-            const result = yield (0, knex_1.db)("users").where("name", "LIKE", `%${q}%`);
-            usersDB = result;
-        }
-        else {
-            const result = yield (0, knex_1.db)("users");
-            usersDB = result;
-        }
-        const result = usersDB.map((user) => {
-            return new User_1.User(user.id, user.name, user.email, user.password, user.created_at);
-        });
-        res.status(200).send(result);
-    }
-    catch (error) {
-        console.log(error);
-        if (req.statusCode === 200) {
-            res.status(500);
-        }
-        if (error instanceof Error) {
-            res.send(error.message);
-        }
-        else {
-            res.send("Erro inesperado");
-        }
-    }
-}));
+const userController = new UserControler_1.UserController();
+const postController = new PostControler_1.PostController();
+const likesController = new LikesControler_1.LikesController();
+app.get("/users", userController.findUsers);
+app.post("/users/signup", userController.createUser);
+app.get("/users/login", userController.userLogin);
+app.get("/posts", postController.findPosts);
+app.post("/posts", postController.createPost);
+app.put("/posts/:id", postController.editPost);
+app.delete("/posts/:id", postController.deletePost);
+app.put("/posts/:id/like", likesController.createLikeOrDislike);
 //# sourceMappingURL=index.js.map

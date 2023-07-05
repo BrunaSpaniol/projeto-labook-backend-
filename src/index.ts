@@ -1,12 +1,10 @@
-import express, { Request, Response } from "express";
+import express from "express";
 
 import cors from "cors";
 
-import { TUserDB, TUserDBPost } from "./models/types";
-import { User } from "./models/User";
-
-import { UserDatabase } from "./database/UserDatabase";
 import { UserController } from "./controller/UserControler";
+import { PostController } from "./controller/PostControler";
+import { LikesController } from "./controller/LikesControler";
 
 const app = express();
 
@@ -18,26 +16,26 @@ app.listen(3003, () => {
   console.log("Servidor rodando na porta 3003");
 });
 
-app.get("/ping", async (req: Request, res: Response) => {
-  try {
-    res.status(200).send({ message: "Pong!" });
-  } catch (error) {
-    console.log(error);
-
-    if (req.statusCode === 200) {
-      res.status(500);
-    }
-
-    if (error instanceof Error) {
-      res.send(error.message);
-    } else {
-      res.send("Erro inesperado");
-    }
-  }
-});
-
 const userController = new UserController();
+
+const postController = new PostController();
+
+const likesController = new LikesController();
 
 app.get("/users", userController.findUsers);
 
-app.post("/users", userController.createUser);
+app.post("/users/signup", userController.createUser);
+
+app.get("/users/login", userController.userLogin);
+
+app.get("/posts", postController.findPosts);
+
+app.post("/posts", postController.createPost);
+
+app.put("/posts/:id", postController.editPost);
+
+app.delete("/posts/:id", postController.deletePost);
+
+app.post("/likes/:id", likesController.createLikeOrDislike);
+
+app.get("/likes", likesController.findLikes);

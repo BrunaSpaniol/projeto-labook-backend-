@@ -2,9 +2,9 @@ import express from "express";
 
 import cors from "cors";
 
-import { UserController } from "./controller/UserControler";
-import { PostController } from "./controller/PostControler";
-import { LikesController } from "./controller/LikesControler";
+import { userRouter } from "./router/userRouter";
+import { likesRouter } from "./router/likesRouter";
+import { postRouter } from "./router/postRouter";
 
 const app = express();
 
@@ -16,26 +16,8 @@ app.listen(3003, () => {
   console.log("Servidor rodando na porta 3003");
 });
 
-const userController = new UserController();
+app.use("/users", userRouter);
 
-const postController = new PostController();
+app.use("/posts", postRouter);
 
-const likesController = new LikesController();
-
-app.get("/users", userController.findUsers);
-
-app.post("/users/signup", userController.createUser);
-
-app.get("/users/login", userController.userLogin);
-
-app.get("/posts", postController.findPosts);
-
-app.post("/posts", postController.createPost);
-
-app.put("/posts/:id", postController.editPost);
-
-app.delete("/posts/:id", postController.deletePost);
-
-app.post("/likes/:id", likesController.createLikeOrDislike);
-
-app.get("/likes", likesController.findLikes);
+app.use("/likes", likesRouter);

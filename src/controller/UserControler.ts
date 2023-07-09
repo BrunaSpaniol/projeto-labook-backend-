@@ -1,166 +1,67 @@
 import { Request, Response } from "express";
-import { UserDatabase } from "../database/UserDatabase";
-import { User } from "../models/User";
-import { TUserDB } from "../models/types";
+
+import { ZodError } from "zod";
+
+import { UserBusiness } from "../business/UserBusiness";
+import { BaseError } from "../errors/BaseError";
+import { CreateUserSchema } from "../dtos/usersDto";
 
 export class UserController {
+  constructor(private userBusiness: UserBusiness) {}
+
   public findUsers = async (req: Request, res: Response) => {
     try {
-      const q = req.query.q as string;
+      const response = await this.userBusiness.findUsers();
 
-      const userDatabase = new UserDatabase();
-
-      const usersDB = await userDatabase.findUsers(q);
-
-      const result: User[] = usersDB.map((user) => {
-        return new User(
-          user.id,
-          user.name,
-          user.email,
-          user.password,
-          user.role,
-          user.created_at
-        );
-      });
-
-      res.status(200).send(result);
+      res.status(200).send(response);
     } catch (error) {
-      console.log(error);
-
-      if (req.statusCode === 200) {
-        res.status(500);
-      }
-
-      if (error instanceof Error) {
-        res.send(error.message);
+      if (error instanceof BaseError) {
+        res.status(error.statusCode).send(error.message); //aqui incluimos o método status com o código do erro correto
       } else {
-        res.send("Erro inesperado");
+        res.status(500).send("Erro inesperado");
       }
     }
   };
 
   public createUser = async (req: Request, res: Response) => {
     try {
-      const { name, email, password } = req.body;
+      const input = CreateUserSchema.parse({
+        name: req.body.name,
+        email: req.body.email,
+        password: req.body.password,
+      });
 
-      if (typeof name !== "string") {
-        res.status(400);
-        throw new Error("'name' deve ser string");
-      }
+      const output = await this.userBusiness.createUser(input);
 
-      if (typeof email !== "string") {
-        res.status(400);
-        throw new Error("'email' deve ser string");
-      }
-
-      if (typeof password !== "string") {
-        res.status(400);
-        throw new Error("'password' deve ser string");
-      }
-
-      if (name.length === 0 || email.length === 0 || password.length === 0) {
-        res.status(400);
-        throw new Error(
-          "'todos os campos devem ser preenchidos para realizar o cadastro"
-        );
-      }
-
-      const UserDataBase = new UserDatabase();
-
-      const userNameDBExists = await UserDataBase.findUsersByParams<string>("name", name);
-
-      const userDBExists = await UserDataBase.findUsersByParams<string>("email", email);
-
-      if (userNameDBExists) {
-        res.status(400);
-        throw new Error("esse nome já está cadastrado");
-      }
-
-      if (userDBExists) {
-        res.status(400);
-        throw new Error(
-          "esse email já está cadastrado, faça o login ou recupere sua senha"
-        );
-      }
-
-      const newUser: User = new User(
-        `user_${Math.random()}`,
-        name,
-        email,
-        password,
-        "ADMIN",
-        new Date().toISOString()
-      );
-
-      const newUserDB: TUserDB = {
-        id: newUser.getId(),
-        name: newUser.getName(),
-        email: newUser.getEmail(),
-        password: newUser.getPassword(),
-        role: newUser.getRole(),
-        created_at: newUser.getCreatedAt(),
-      };
-
-      await UserDataBase.insertUser(newUserDB);
-
-      res.status(201).send(newUser);
+      res.status(201).send(output);
     } catch (error) {
-      console.log(error);
-
-      if (req.statusCode === 200) {
-        res.status(500);
-      }
-
-      if (error instanceof Error) {
-        res.send(error.message);
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
+        res.status(error.statusCode).send(error.message);
       } else {
-        res.send("Erro inesperado");
+        res.status(500).send("Erro inesperado");
       }
     }
   };
 
   public userLogin = async (req: Request, res: Response) => {
     try {
-      const { email, password } = req.body;
+      const input = CreateUserSchema.parse({
+        email: req.body.email,
+        password: req.body.password,
+      });
 
-      const userDatabase = new UserDatabase();
+      const output = await this.userBusiness.userLogin(input);
 
-      if (typeof email !== "string") {
-        res.status(400);
-        throw new Error("'email' deve ser string");
-      }
-
-      if (typeof password !== "string") {
-        res.status(400);
-        throw new Error("'password' deve ser string");
-      }
-
-      if (email.length === 0 || password.length === 0) {
-        res.status(400);
-        throw new Error(
-          "'todos os campos devem ser preenchidos para realizar o cadastro"
-        );
-      }
-
-      const findUserLogin = await userDatabase.findUserLogin(email, password);
-
-      if(!findUserLogin){
-        res.status(400);
-        throw new Error("e-mail ou senha incorreta!");
-      }
-
-      res.status(200).send(findUserLogin);
+      res.status(200).send(output);
     } catch (error) {
-      console.log(error);
-
-      if (req.statusCode === 200) {
-        res.status(500);
-      }
-
-      if (error instanceof Error) {
-        res.send(error.message);
+      if (error instanceof ZodError) {
+        res.status(400).send(error.issues);
+      } else if (error instanceof BaseError) {
+        res.status(error.statusCode).send(error.message);
       } else {
-        res.send("Erro inesperado");
+        res.status(500).send("Erro inesperado");
       }
     }
   };

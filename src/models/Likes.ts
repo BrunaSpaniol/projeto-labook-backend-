@@ -2,7 +2,7 @@ export class Like {
   constructor(
     private userId: string,
     private postId: string,
-    private likes: boolean | null
+    private likes: 1 | 0 | null
   ) {}
 
   public getUserId = (): string => {
@@ -13,7 +13,7 @@ export class Like {
     return this.postId;
   };
 
-  public getLikes = (): boolean | null => {
+  public getLikes = (): 1 | 0 | null => {
     return this.likes;
   };
 
@@ -25,7 +25,7 @@ export class Like {
     this.postId = input;
   };
 
-  public setLikes = (input: boolean): void => {
+  public setLikes = (input: 1 | 0 | null): void => {
     this.likes = input;
   };
 }

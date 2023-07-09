@@ -3,10 +3,10 @@ export class Post {
     private id: string,
     private creator_id: string,
     private content: string,
-    private likes: boolean | null,
-    private dislikes: boolean | null,
+    private likes: number,
+    private dislikes: number,
     private created_at: string,
-    private updated_at: string
+    private updated_at: string | null
   ) {}
 
   public getId = (): string => {
@@ -21,11 +21,11 @@ export class Post {
     return this.content;
   };
 
-  public getLikes = (): boolean | null => {
+  public getLikes = (): number => {
     return this.likes;
   };
 
-  public getDislikes = (): boolean |null=> {
+  public getDislikes = (): number => {
     return this.dislikes;
   };
 
@@ -33,7 +33,7 @@ export class Post {
     return this.created_at;
   };
 
-  public getUpdatedAt  = (): string => {
+  public getUpdatedAt = (): string| null => {
     return this.updated_at;
   };
 
@@ -45,11 +45,11 @@ export class Post {
     this.content = input;
   };
 
-  public setLikes = (input: boolean): void => {
+  public setLikes = (input: number): void => {
     this.likes = input;
   };
 
-  public setDislikes = (input: boolean): void => {
+  public setDislikes = (input: number): void => {
     this.dislikes = input;
   };
 

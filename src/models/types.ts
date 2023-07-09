@@ -20,12 +20,26 @@ export interface TUserDB {
 
 export interface TPostDB {
   id: string;
-  creator_id: string;
   content: string;
-  likes: boolean | null;
-  dislikes: boolean | null;
+  likes: number;
+  dislikes: number;
   created_at: string;
-  updated_at: string;
+  updated_at: string | null;
+  creator_id: string;
+  creator_name?: string;
+}
+
+export interface PostOutput  {
+  id:string  ,
+  content:string ,
+  likes: number,
+  dislikes:number ,
+  createdAt:string, 
+  updatedAt:string | null, 
+  creator: {
+      id:string,
+      name:string
+  }
 }
 
 // tipagem para criação (POST) sem balance e created_at
@@ -48,4 +62,10 @@ export interface TPostResponse {
   createdAt: string;
   updatedAt: string;
   creator: Creator;
+}
+
+
+export enum LikeInput {
+  "true" = 1,
+  "false" = 0,
 }

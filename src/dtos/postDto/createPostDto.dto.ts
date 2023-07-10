@@ -1,29 +1,22 @@
 import z from "zod";
-import { TPostDB } from "../../models/types";
 
 export interface CreatePostInputDTO {
-  creator_id: string;
+  token: string;
   content: string;
 }
 
 export interface CreatePostOutputDTO {
   message: string;
-  post: TPostDB
 }
 
 export const CreatePostSchema = z
   .object({
-    creator_id: z
-      .string({
-        required_error: "'id' é obrigatória",
-        invalid_type_error: "'id' deve ser do tipo string",
-      })
-      .min(1, "'id' deve possuir no mínimo 1 caractere"),
+    token: z.string().min(1),
     content: z
       .string({
-        required_error: "'name' é obrigatório",
-        invalid_type_error: "'name' deve ser do tipo string",
+        required_error: "'content' é obrigatório",
+        invalid_type_error: "'content' deve ser do tipo string",
       })
-      .min(2, "'name' deve possuir no mínimo 2 caracteres"),
+      .min(1, "'content' deve possuir no mínimo 1 caracter"),
   })
   .transform((data) => data as CreatePostInputDTO);

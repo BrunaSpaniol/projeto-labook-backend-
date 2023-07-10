@@ -33,8 +33,7 @@ export class LikesDatabase extends BaseDatabase {
   }: TLikesDislikesDB): Promise<void> {
     await BaseDatabase.connection(LikesDatabase.TABLE_NAME)
       .update({ like })
-      .where({ user_id })
-      .andWhere({ post_id });
+      .where({ user_id, post_id });
   }
 
   public async deleteLike(user_id: string, post_id: string): Promise<void> {
@@ -47,5 +46,16 @@ export class LikesDatabase extends BaseDatabase {
     await BaseDatabase.connection(LikesDatabase.TABLE_NAME)
       .delete()
       .where({ post_id });
+  }
+  public async getLikes(
+    post_id: string
+  ): Promise<[likes: TLikesDislikesDB[], dislikes: TLikesDislikesDB[]]> {
+    const likes = await BaseDatabase.connection(LikesDatabase.TABLE_NAME)
+      .where({ post_id}).andWhere({like: 1})
+
+    const dislikes = await BaseDatabase.connection(LikesDatabase.TABLE_NAME)
+      .where({ post_id }).andWhere({like:0})
+
+    return [likes , dislikes];
   }
 }

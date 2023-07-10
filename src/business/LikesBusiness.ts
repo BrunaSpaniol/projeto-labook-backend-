@@ -7,16 +7,26 @@ import {
 } from "../dtos/likeDTO/createLikeDto.dto";
 
 import { BadRequestError, NotFoundError } from "../errors";
+import { TokenManager } from "../services";
 
 export class LikeBusiness {
   constructor(
     private postDatabase: PostDatabase,
     private userDatabase: UserDatabase,
-    private likesDatabase: LikesDatabase
+    private likesDatabase: LikesDatabase,
+    private tokenManager: TokenManager
   ) {}
 
   public createLikeOrDislike = async (input: CreateLikeInputDTO) => {
-    const { postId, like, userId } = input;
+    const { postId, like, token } = input;
+
+    const payload = this.tokenManager.getPayload(token);
+
+    if (payload === null) {
+      throw new BadRequestError("token inválido");
+    }
+
+    const userId = payload.id;
 
     const isPostExists = await this.postDatabase.findPostById(postId);
 
@@ -51,14 +61,14 @@ export class LikeBusiness {
 
     const isLikeorDislike = setLike === 1 ? "likes" : "dislikes";
 
-    //se o post ainda não teve nenhum like, ou se o usuário ainda não deu like ou dislike no post
-    if (isUserAlreadyLiked?.like === undefined) {
-      const newLikeDB: TLikesDislikesDB = {
-        user_id: newLike.getUserId(),
-        post_id: newLike.getPostId(),
-        like: setLike,
-      };
+    const newLikeDB: TLikesDislikesDB = {
+      user_id: newLike.getUserId(),
+      post_id: newLike.getPostId(),
+      like: setLike,
+    };
 
+    //se o post ainda não teve nenhum like, ou se o usuário ainda não deu like ou dislike no post
+    if (isUserAlreadyLiked === undefined || !isUserAlreadyLiked) {
       await this.likesDatabase.insertLike(newLikeDB);
 
       await this.postDatabase.AddLikeOrDislike(postId, isLikeorDislike);
@@ -70,35 +80,29 @@ export class LikeBusiness {
       return response;
     }
 
-    //Caso o usuário já tenha dado like antes e dê like novamente
-    if (setLike === isUserAlreadyLiked?.like) {
-      await this.postDatabase.RemoveLikeOrDislike(postId, isLikeorDislike);
+    if (!!isUserAlreadyLiked) {
+      //Caso o usuário já tenha dado like antes e dê like novamente
+      if (setLike === isUserAlreadyLiked.like) {
+        await this.likesDatabase.deleteLike(userId, postId);
+      }
 
-      await this.likesDatabase.deleteLike(userId, postId);
+      //Caso o usuário tenha dado like anteriormente e agora deu dislike ou o oposto
+      if (setLike !== isUserAlreadyLiked.like) {
+        await this.likesDatabase.updateLike(newLikeDB);
+      }
 
-      const response = { message: "Like removido com sucesso!" };
+      const [likes, dislikes] = await this.likesDatabase.getLikes(postId);
+
+      await this.postDatabase.updateLikePost(
+        postId,
+        likes.length,
+        dislikes.length
+      );
+
+      const response = { message: "Like atualizado com sucesso!" };
 
       return response;
     }
-
-    //Caso o usuário tenha dado like anteriormente e agora deu dislike ou o oposto
-
-    const newLikeDB: TLikesDislikesDB = {
-      user_id: newLike.getUserId(),
-      post_id: newLike.getPostId(),
-      like: setLike,
-    };
-
-    if (isLikeorDislike === "likes") {
-      await this.postDatabase.updateLikePost(postId, "dislikes", "likes");
-    } else {
-      await this.postDatabase.updateLikePost(postId, "likes", "dislikes");
-    }
-
-    await this.likesDatabase.updateLike(newLikeDB);
-
-    const response = { message: "Like atualizado com sucesso!" };
-    return response;
   };
 
   public findLikes = async () => {
@@ -115,8 +119,10 @@ export class LikeBusiness {
     return response;
   };
 
-  public deleteAllLikes = async (q: string) => {
-    await this.likesDatabase.deleteAllPostLike(q);
+  public deleteAllLikes = async (postId: string) => {
+    await this.likesDatabase.deleteAllPostLike(postId);
+
+    await this.postDatabase.updateLikePost(postId, 0, 0);
 
     const response = "todos os likes foram deletados";
 

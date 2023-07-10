@@ -1,4 +1,30 @@
-import { USER_ROLES } from "./types";
+export enum USER_ROLES {
+  NORMAL = "NORMAL",
+  ADMIN = "ADMIN",
+}
+
+export interface TUserDB {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  role: USER_ROLES;
+  created_at: string;
+}
+
+export interface UserModel {
+  id: string;
+  name: string;
+  email: string;
+  role: USER_ROLES;
+  createdAt: string;
+}
+
+export interface TokenPayload {
+  id: string;
+  name: string;
+  role: USER_ROLES;
+}
 
 export class User {
   constructor(
@@ -6,7 +32,7 @@ export class User {
     private name: string,
     private email: string,
     private password: string,
-    private role: keyof typeof USER_ROLES,
+    private role: USER_ROLES,
     private created_at: string
   ) {}
 
@@ -26,7 +52,7 @@ export class User {
     return this.password;
   };
 
-  public getRole = (): keyof typeof USER_ROLES => {
+  public getRole = (): USER_ROLES => {
     return this.role;
   };
 
@@ -46,11 +72,32 @@ export class User {
     this.password = input;
   };
 
-  public setRole = (input: keyof typeof USER_ROLES): void => {
+  public setRole = (input: USER_ROLES): void => {
     this.role = input;
   };
 
   public setCreatedAt = (input: string): void => {
     this.created_at = input;
   };
+
+  public toDBModel(): TUserDB {
+    return {
+      id: this.id,
+      name: this.name,
+      email: this.email,
+      password: this.password,
+      role: this.role,
+      created_at: this.created_at,
+    };
+  }
+
+  public toBusinessModel(): UserModel {
+    return {
+      id: this.id,
+      name: this.name,
+      email: this.email,
+      role: this.role,
+      createdAt: this.created_at,
+    };
+  }
 }

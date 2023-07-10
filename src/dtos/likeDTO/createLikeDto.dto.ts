@@ -4,8 +4,8 @@ const like = z.enum(["true", "false"]);
 
 export interface CreateLikeInputDTO {
   postId: string;
-  like : z.infer<typeof like>;
-  userId: string;
+  like: z.infer<typeof like>;
+  token: string;
 }
 
 export interface CreateLikeOutputDTO {
@@ -26,5 +26,6 @@ export const CreateLikeSchema = z
         invalid_type_error: "'like' deve ser do tipo string",
       })
       .min(2, "'name' deve possuir no mínimo 2 caracteres"),
+    token: z.string().min(1),
   })
   .transform((data) => data as CreateLikeInputDTO);

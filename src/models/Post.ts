@@ -1,3 +1,27 @@
+export interface TPostDB {
+  id: string;
+  content: string;
+  likes: number;
+  dislikes: number;
+  created_at: string;
+  updated_at: string | null;
+  creator_id: string;
+  creator_name?: string;
+}
+
+export interface PostOutput {
+  id: string;
+  content: string;
+  likes: number;
+  dislikes: number;
+  createdAt: string;
+  updatedAt: string | null;
+  creator: {
+    id: string;
+    name: string;
+  };
+}
+
 export class Post {
   constructor(
     private id: string,
@@ -6,7 +30,8 @@ export class Post {
     private likes: number,
     private dislikes: number,
     private created_at: string,
-    private updated_at: string | null
+    private updated_at: string | null,
+    private creator_name?: string
   ) {}
 
   public getId = (): string => {
@@ -33,7 +58,7 @@ export class Post {
     return this.created_at;
   };
 
-  public getUpdatedAt = (): string| null => {
+  public getUpdatedAt = (): string | null => {
     return this.updated_at;
   };
 
@@ -60,4 +85,32 @@ export class Post {
   public setUpdatedAt = (input: string): void => {
     this.updated_at = input;
   };
+
+  public toDBModel(): TPostDB {
+    return {
+      id: this.id,
+      content: this.content,
+      likes: this.likes,
+      dislikes: this.dislikes,
+      created_at: this.created_at,
+      updated_at: this.updated_at,
+      creator_id: this.creator_id,
+      creator_name: this.creator_name,
+    };
+  }
+
+  public toBusinessModel(): PostOutput {
+    return {
+      id: this.id,
+      content: this.content,
+      likes: this.likes,
+      dislikes: this.dislikes,
+      createdAt: this.created_at,
+      updatedAt: this.updated_at,
+      creator: {
+        id: this.creator_id,
+        name: this.creator_name ?? "",
+      },
+    };
+  }
 }

@@ -8,12 +8,7 @@ export interface CreateUserInputDTO {
 
 export interface CreateUserOutputDTO {
   message: string;
-  user: {
-    name: string;
-    email: string;
-    password: string;
-    createdAt: string;
-  };
+  token: string
 }
 
 export const CreateUserSchema = z

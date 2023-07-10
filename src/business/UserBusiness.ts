@@ -1,4 +1,6 @@
 import { UserDatabase } from "../database/UserDatabase";
+import { User, UserModel, TUserDB, TokenPayload, USER_ROLES } from "../models";
+import { HashManager, IdGenerator, TokenManager } from "../services";
 import {
   UserLoginInputDTO,
   UserLoginOutputDTO,
@@ -8,27 +10,46 @@ import {
   CreateUserOutputDTO,
 } from "../dtos/usersDto/createUserDto.dto";
 import { BadRequestError } from "../errors/BadRequestError";
-import { User } from "../models/User";
-import { TUserDB } from "../models/types";
+import { GetUsersInputDTO, GetUsersOutputDTO } from "../dtos/usersDto";
 
 export class UserBusiness {
-  constructor(private userDatabase: UserDatabase) {}
+  constructor(
+    private userDatabase: UserDatabase,
+    private idGenerator: IdGenerator,
+    private tokenManager: TokenManager,
+    private hashManager: HashManager
+  ) {}
 
-  public findUsers = async () => {
+  public findUsers = async (
+    input: GetUsersInputDTO
+  ): Promise<GetUsersOutputDTO> => {
+    const { token } = input
+
+    const payload = this.tokenManager.getPayload(token);
+
+    if (payload === null) {
+      throw new BadRequestError("token inválido");
+    }
+
+    if (payload.role !== USER_ROLES.ADMIN) {
+      throw new BadRequestError("somente admins podem acessar esse recurso");
+    }
+
     const usersDB = await this.userDatabase.findUsers();
 
-    const result: User[] = usersDB.map((user) => {
-      return new User(
-        user.id,
-        user.name,
-        user.email,
-        user.password,
-        user.role,
-        user.created_at
+    const result: UserModel[] = usersDB.map((userDB) => {
+      const user =  new User(
+        userDB.id,
+        userDB.name,
+        userDB.email,
+        userDB.password,
+        userDB.role,
+        userDB.created_at
       );
+      return user.toBusinessModel();
     });
 
-    const response: User[] = result;
+    const response: GetUsersOutputDTO = result;
 
     return response;
   };
@@ -58,12 +79,22 @@ export class UserBusiness {
       );
     }
 
+    const id = this.idGenerator.generate();
+
+    const isUserIdExists = await this.userDatabase.findUserById(id);
+
+    if (isUserIdExists) {
+      throw new BadRequestError("esse id já está cadastrado");
+    }
+
+    const hashedPassword = await this.hashManager.hash(password)
+
     const newUser: User = new User(
-      `user_${Math.random()}`,
+      id,
       name,
       email,
-      password,
-      "ADMIN",
+      hashedPassword,
+      USER_ROLES.ADMIN,
       new Date().toISOString()
     );
 
@@ -78,14 +109,17 @@ export class UserBusiness {
 
     await this.userDatabase.insertUser(newUserDB);
 
+    const tokenPayload: TokenPayload = {
+      id: newUser.getId(),
+      name: newUser.getName(),
+      role: newUser.getRole(),
+    };
+
+    const token = this.tokenManager.createToken(tokenPayload);
+
     const response: CreateUserOutputDTO = {
       message: "Cadastro realizado com sucesso!",
-      user: {
-        name: newUser.getName(),
-        email: newUser.getEmail(),
-        password: newUser.getPassword(),
-        createdAt: newUser.getCreatedAt(),
-      },
+      token,
     };
 
     return response;
@@ -96,13 +130,38 @@ export class UserBusiness {
   ): Promise<UserLoginOutputDTO> => {
     const { email, password } = input;
 
-    const result = await this.userDatabase.findUserLogin(email, password);
+    const result = await this.userDatabase.findUserLogin(email);
 
     if (!result) {
-      throw new BadRequestError("e-mail ou senha incorreta!");
+      throw new BadRequestError("e-mail incorreto!");
     }
 
-    const response = { message: "usuário encontrado", user: result };
+    const hashedPassword = result.password
+
+    const isPasswordCorrect = await this.hashManager.compare(password, hashedPassword)
+
+    if (!isPasswordCorrect) {
+      throw new BadRequestError("'email' ou 'password' incorretos")
+    }
+
+    const findUser: User = new User(
+      result?.id,
+      result?.name,
+      result?.email,
+      result?.password,
+      result?.role,
+      result?.created_at
+    );
+
+    const tokenPayload: TokenPayload = {
+      id: findUser.getId(),
+      name: findUser.getName(),
+      role: findUser.getRole(),
+    };
+
+    const token = this.tokenManager.createToken(tokenPayload);
+
+    const response = { message: "usuário logado", token };
 
     return response;
   };

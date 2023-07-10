@@ -1,5 +1,4 @@
 import z from "zod";
-import { TUserDB } from "../../models/types";
 
 export interface UserLoginInputDTO {
   email: string;
@@ -8,7 +7,7 @@ export interface UserLoginInputDTO {
 
 export interface UserLoginOutputDTO {
   message: string;
-  user: TUserDB
+  token: string;
 }
 
 export const UserLoginSchema = z

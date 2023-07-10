@@ -9,14 +9,18 @@ import {
   EditPostSchema,
   DeletePostSchema,
 } from "../dtos/postDto";
+import { GetPostsSchema } from "../dtos/postDto/getPostsDTO.dto";
 
 export class PostController {
   constructor(private PostBusiness: PostBusiness) {}
 
   public findPosts = async (req: Request, res: Response) => {
     try {
+      const input = GetPostsSchema.parse({
+        token: req.headers.authorization,
+      });
 
-      const output = await this.PostBusiness.findPosts();
+      const output = await this.PostBusiness.findPosts(input);
 
       res.status(200).send(output);
     } catch (error) {
@@ -37,7 +41,7 @@ export class PostController {
   public createPost = async (req: Request, res: Response) => {
     try {
       const input = CreatePostSchema.parse({
-        creator_id: req.body.creator_id,
+        token: req.headers.authorization,
         content: req.body.content,
       });
 
@@ -59,7 +63,7 @@ export class PostController {
     try {
       const input = EditPostSchema.parse({
         id: req.params.id,
-        creator_id: req.body.creator_id,
+        token: req.headers.authorization,
         content: req.body.content,
       });
 
@@ -81,7 +85,7 @@ export class PostController {
     try {
       const input = DeletePostSchema.parse({
         id: req.params.id,
-        creator_id: req.body.creator_id,
+        token: req.headers.authorization,
       });
 
       const output = await this.PostBusiness.deletePost(input);

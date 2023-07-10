@@ -96,4 +96,4 @@ Certifique-se de seguir as boas práticas de programação, incluindo testes e d
 
 ## Documentação da API
 
-A documentação completa da API pode ser encontrada em https://documenter.getpostman.com/view/24822927/2s946bBEpk
+A documentação completa da API pode ser encontrada em [https://documenter.getpostman.com/view/24822927/2s946bBEpk](https://documenter.getpostman.com/view/24822927/2s946bBEpk)https://documenter.getpostman.com/view/24822927/2s946bBEpk

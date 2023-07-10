@@ -4,14 +4,22 @@ import { ZodError } from "zod";
 
 import { UserBusiness } from "../business/UserBusiness";
 import { BaseError } from "../errors/BaseError";
-import { CreateUserSchema } from "../dtos/usersDto";
+import {
+  CreateUserSchema,
+  GetUsersSchema,
+  UserLoginSchema,
+} from "../dtos/usersDto";
 
 export class UserController {
   constructor(private userBusiness: UserBusiness) {}
 
   public findUsers = async (req: Request, res: Response) => {
     try {
-      const response = await this.userBusiness.findUsers();
+      const input = GetUsersSchema.parse({
+        token: req.headers.authorization,
+      });
+
+      const response = await this.userBusiness.findUsers(input);
 
       res.status(200).send(response);
     } catch (error) {
@@ -47,7 +55,7 @@ export class UserController {
 
   public userLogin = async (req: Request, res: Response) => {
     try {
-      const input = CreateUserSchema.parse({
+      const input = UserLoginSchema.parse({
         email: req.body.email,
         password: req.body.password,
       });

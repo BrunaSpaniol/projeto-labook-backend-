@@ -13,7 +13,7 @@ export class LikesController {
       const input = CreateLikeSchema.parse({
         postId: req.params.id,
         like: req.body.like,
-        userId: req.body.userId,
+        token: req.headers.authorization,
       });
 
       const output = await this.LikeBusiness.createLikeOrDislike(input);

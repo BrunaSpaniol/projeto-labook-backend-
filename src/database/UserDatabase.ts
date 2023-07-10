@@ -1,4 +1,4 @@
-import { TUserDB } from "../models/types";
+import { TUserDB } from "../models";
 
 import { BaseDatabase } from "./BaseDatabase";
 
@@ -31,10 +31,10 @@ export class UserDatabase extends BaseDatabase {
     return userDb;
   }
 
-  public async findUserLogin(email:string, password:string): Promise<TUserDB | undefined> {
+  public async findUserLogin(email:string,): Promise<TUserDB | undefined> {
     const [userDb]: TUserDB[] = await BaseDatabase.connection(
       UserDatabase.TABLE_NAME
-    ).where({ email, password })
+    ).where({ email })
 
     return userDb
   }

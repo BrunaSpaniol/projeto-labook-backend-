@@ -4,7 +4,7 @@ import { BaseDatabase } from "./BaseDatabase";
 export class PostDatabase extends BaseDatabase {
   public static TABLE_NAME = "posts";
 
-  public async findPosts(): Promise<PostOutput[]> {
+  public async findPosts(): Promise<TPostDB[]> {
     const result = await BaseDatabase.connection(PostDatabase.TABLE_NAME)
       .select(
         "posts.id AS id",
@@ -14,26 +14,11 @@ export class PostDatabase extends BaseDatabase {
         "posts.created_at",
         "updated_at",
         "users.id AS creator_id",
-        "name AS creator_name"
+        "users.name AS creator_name"
       )
       .join("users", "posts.creator_id", "=", "users.id");
 
-    const postsDB: PostOutput[] = result.map((post) => {
-      return {
-        id: post.id,
-        content: post.content,
-        likes: post.likes,
-        dislikes: post.dislikes,
-        createdAt: post.created_at,
-        updatedAt: post.updated_at,
-        creator: {
-          id: post.creator_id,
-          name: post.creator_name,
-        },
-      };
-    });
-
-    return postsDB;
+    return result;
   }
 
   public async findPostById(id: string): Promise<TPostDB | undefined> {
@@ -75,16 +60,14 @@ export class PostDatabase extends BaseDatabase {
 
   public async updateLikePost(
     id: string,
-    increment: "likes" | "dislikes",
-    decrement: "likes" | "dislikes"
+    likes: number,
+    dislikes: number
   ): Promise<void> {
     const updated_at: string = new Date().toISOString();
 
     await BaseDatabase.connection(PostDatabase.TABLE_NAME)
       .where({ id })
-      .update({ updated_at })
-      .increment(`${increment}`, 1)
-      .decrement(`${decrement}`, 1);
+      .update({ updated_at, likes, dislikes })
   }
 
   public async AddLikeOrDislike(
@@ -99,15 +82,13 @@ export class PostDatabase extends BaseDatabase {
       .increment(`${action}`, 1);
   }
 
-  public async RemoveLikeOrDislike(
-    id: string,
-    action: "likes" | "dislikes"
-  ): Promise<void> {
+  public async RemoveLikeOrDislike(id: string): Promise<void> {
     const updated_at: string = new Date().toISOString();
+    const likes = 0;
+    const dislikes = 0;
 
     await BaseDatabase.connection(PostDatabase.TABLE_NAME)
       .where({ id })
-      .update({ updated_at })
-      .decrement(`${action}`, 1);
+      .update({ updated_at, likes, dislikes });
   }
 }

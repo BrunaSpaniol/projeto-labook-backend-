@@ -1,3 +1,19 @@
+export enum LikeInput {
+  "true" = 1,
+  "false" = 0,
+}
+
+export enum PostLike {
+  "true" = "likes",
+  "false" = "dislikes",
+}
+
+export interface TLikesDislikesDB {
+  user_id: string;
+  post_id: string;
+  like: 1 | 0 | null;
+}
+
 export class Like {
   constructor(
     private userId: string,

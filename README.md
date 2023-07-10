@@ -1,6 +1,6 @@
 # Projeto Labook Backend
 
-Este é o repositório do backend do projeto Labook, uma rede social desenvolvida como projeto de backend do bootcamp da Labenu. O Labook permite que os usuários criem contas, façam amizades, postem mensagens, comentários e curtam publicações de outros usuários.
+Este é o repositório do backend do projeto Labook, uma rede social desenvolvida como projeto de backend do bootcamp da Labenu. O Labook permite que os usuários criem contas, façam amizades, postem mensagens e curtam publicações de outros usuários.
 
 ## Tecnologias Utilizadas
 
